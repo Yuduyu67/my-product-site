@@ -1,0 +1,116 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import type { ConversationEntry, Hint } from "./scenes";
+import { HintScaffolding } from "./HintScaffolding";
+
+interface ChatInterfaceProps {
+  conversation: ConversationEntry[];
+  loading?: boolean;
+  error?: string | null;
+  /** If true, use reveal-mode (for mock data). If false, show all in real-time (for AI). */
+  isRealtime?: boolean;
+}
+
+export function ChatInterface({ conversation, loading, error, isRealtime = false }: ChatInterfaceProps) {
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [revealedHints, setRevealedHints] = useState<Set<number>>(new Set());
+
+  // Auto-reveal all messages in realtime mode
+  useEffect(() => {
+    if (isRealtime) {
+      setRevealedCount(conversation.length);
+    } else {
+      setRevealedCount(0);
+    }
+  }, [conversation.length, isRealtime]);
+
+  function handleNext() {
+    setRevealedCount((c) => Math.min(c + 2, conversation.length));
+  }
+
+  function toggleHints(entryIndex: number) {
+    setRevealedHints((prev) => {
+      const next = new Set(prev);
+      if (next.has(entryIndex)) next.delete(entryIndex); else next.add(entryIndex);
+      return next;
+    });
+  }
+
+  // Loading indicator
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", padding: "40px 0", color: "var(--cm-text-muted)" }}>
+        <div style={{ fontSize: "1.5rem", marginBottom: 8 }}>🎓</div>
+        <div>AI 导师正在思考...</div>
+      </div>
+    );
+  }
+
+  if (conversation.length === 0) {
+    return (
+      <div style={{ textAlign: "center", color: "var(--cm-text-muted)", marginTop: 60 }}>
+        <p style={{ fontSize: "2rem" }}>💬</p>
+        <p>点击"开始诊断"，AI 导师将引导你自主排查问题。</p>
+      </div>
+    );
+  }
+
+  // Error message
+  if (error) {
+    return (
+      <div style={{ textAlign: "center", padding: "30px 0", color: "#f87171" }}>
+        <p style={{ fontSize: "1.2rem", marginBottom: 8 }}>❌ {error}</p>
+        <p style={{ fontSize: "0.85rem", color: "var(--cm-text-muted)" }}>请重试或稍后再次尝试</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {conversation.slice(0, revealedCount).map((entry, idx) => (
+        <div key={idx} className={`cm-chat-msg ${entry.role}`}>
+          <div className="cm-chat-avatar">{entry.role === "ai" ? "🎓" : "👤"}</div>
+          <div>
+            <div className="cm-chat-bubble">{entry.content}</div>
+            {entry.hints && entry.hints.length > 0 && (
+              <>
+                <button onClick={() => toggleHints(idx)} style={{ display: "block", marginTop: 8, fontSize: "0.78rem", color: "var(--cm-primary)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                  {revealedHints.has(idx) ? "▲ 收起引导线索" : "▼ 查看引导线索"}
+                </button>
+                {revealedHints.has(idx) && <HintScaffolding hints={entry.hints as Hint[]} />}
+              </>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* Realtime mode: always show all messages, no reveal button */}
+      {isRealtime && (
+        <div style={{ textAlign: "center", marginTop: 16, padding: "14px 0", borderTop: "1px solid var(--cm-border)", color: "var(--cm-text-muted)", fontSize: "0.85rem" }}>
+          对话已实时展示，继续输入你的问题或代码...
+        </div>
+      )}
+
+      {/* Reveal mode: show reveal button for mock data */}
+      {!isRealtime && conversation.length > 0 && (
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          {revealedCount < conversation.length ? (
+            <>
+              <button className="cm-btn-glass cm-btn-glass-sm" onClick={handleNext}>
+                💡 揭示下一步
+              </button>
+              <span style={{ marginLeft: 12, fontSize: "0.8rem", color: "var(--cm-text-muted)" }}>
+                剩余 {Math.ceil((conversation.length - revealedCount) / 2)} 轮
+              </span>
+            </>
+          ) : (
+            <div style={{ color: "var(--cm-text-muted)", fontSize: "0.85rem" }}>
+              ✅ 全部对话已展示完毕！引导学生自主完成实践验证。
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
