@@ -93,6 +93,12 @@ export default function TeacherDashboardPage() {
   const reload = useMemo(() => {
     return async () => {
       if (!supabase || !user) return;
+
+      // 获取当前用户的 session 并设置到客户端（解决 RLS 拦截问题）
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session) return;
+      await supabase.auth.setSession(session.session);
+
       const [exchangesRes, profilesRes, countRes] = await Promise.all([
         supabase
           .from("conversations")
