@@ -7,6 +7,8 @@ export interface ConversationEntry {
   role: "student" | "ai";
   content: string;
   hints?: Hint[];
+  /** Supabase row id when this exchange is persisted */
+  id?: string;
 }
 
 export interface Scene {

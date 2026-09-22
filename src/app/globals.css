@@ -2150,3 +2150,10 @@ section[id]{scroll-margin-top:16px}
 /* Button variants used in pricing (ghost variant) */
 .btn-ghost-v{background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(0,0,0,.45) 50%,rgba(160,175,200,.08));color:#fff;border:1px solid rgba(198,198,198,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
 .btn-ghost-v:hover{background:linear-gradient(135deg,rgba(210,225,255,.18),rgba(0,0,0,.35) 48%,rgba(180,195,220,.16));border-color:rgba(220,230,255,.75);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 20px rgba(170,200,255,.22)}
+
+/* Live dashboard pulse for new-data indicator */
+@keyframes cm-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+

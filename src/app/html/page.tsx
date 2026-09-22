@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { DiagnosticsEngine } from "@/components/mentor/DiagnosticsEngine";
 import { CodeInputPanel } from "@/components/mentor/CodeInputPanel";
 import { ChatInterface } from "@/components/mentor/ChatInterface";
 import { SCENES } from "@/components/mentor/scenes";
@@ -9,9 +8,9 @@ import { useChat } from "@/hooks/useChat";
 
 export default function HTMLCSTMentorPage() {
   const scene = SCENES.htmlcss[0];
-  const { conversation, loading, error, sendMessage, startDiagnosis } = useChat();
+  const { conversation, loading, restoring, error, sendMessage, deleteExchange } = useChat("HTML/CSS");
 
-  const isAiMode = conversation.length >= 2 || loading;
+  const isAiMode = restoring || conversation.length >= 2 || loading;
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
@@ -22,10 +21,7 @@ export default function HTMLCSTMentorPage() {
       </header>
       <div className="cm-lab-layout">
         <div className="cm-lab-left">
-          <DiagnosticsEngine onStartDiagnosis={() => startDiagnosis(scene.defaultCode, scene.defaultLog, "HTML/CSS")} />
           <CodeInputPanel
-            defaultCode={scene.defaultCode}
-            defaultLog={scene.defaultLog}
             onSend={sendMessage}
             loading={loading}
             language="HTML/CSS"
@@ -33,7 +29,7 @@ export default function HTMLCSTMentorPage() {
         </div>
         <div className="cm-lab-right">
           {isAiMode ? (
-            <ChatInterface conversation={conversation} loading={loading} error={error} isRealtime />
+            <ChatInterface conversation={conversation} loading={loading || restoring} error={error} isRealtime onDeleteExchange={deleteExchange} />
           ) : (
             <ChatInterface conversation={scene.conversation} isRealtime={false} />
           )}

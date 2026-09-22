@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { ConversationEntry, Hint } from "./scenes";
 import { HintScaffolding } from "./HintScaffolding";
 
@@ -10,20 +10,16 @@ interface ChatInterfaceProps {
   error?: string | null;
   /** If true, use reveal-mode (for mock data). If false, show all in real-time (for AI). */
   isRealtime?: boolean;
+  /** Called with the index of a student message to delete that exchange */
+  onDeleteExchange?: (studentIndex: number) => void;
 }
 
-export function ChatInterface({ conversation, loading, error, isRealtime = false }: ChatInterfaceProps) {
+export function ChatInterface({ conversation, loading, error, isRealtime = false, onDeleteExchange }: ChatInterfaceProps) {
   const [revealedCount, setRevealedCount] = useState(0);
   const [revealedHints, setRevealedHints] = useState<Set<number>>(new Set());
 
-  // Auto-reveal all messages in realtime mode
-  useEffect(() => {
-    if (isRealtime) {
-      setRevealedCount(conversation.length);
-    } else {
-      setRevealedCount(0);
-    }
-  }, [conversation.length, isRealtime]);
+  // Realtime mode shows everything; reveal mode advances manually
+  const visibleCount = isRealtime ? conversation.length : Math.min(revealedCount, conversation.length);
 
   function handleNext() {
     setRevealedCount((c) => Math.min(c + 2, conversation.length));
@@ -51,7 +47,7 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
     return (
       <div style={{ textAlign: "center", color: "var(--cm-text-muted)", marginTop: 60 }}>
         <p style={{ fontSize: "2rem" }}>💬</p>
-        <p>点击"开始诊断"，AI 导师将引导你自主排查问题。</p>
+        <p>在左侧对话框粘贴代码或报错日志发送，AI 导师将引导你自主排查问题。</p>
       </div>
     );
   }
@@ -68,11 +64,20 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
 
   return (
     <div>
-      {conversation.slice(0, revealedCount).map((entry, idx) => (
+      {conversation.slice(0, visibleCount).map((entry, idx) => (
         <div key={idx} className={`cm-chat-msg ${entry.role}`}>
           <div className="cm-chat-avatar">{entry.role === "ai" ? "🎓" : "👤"}</div>
           <div>
             <div className="cm-chat-bubble">{entry.content}</div>
+            {entry.role === "student" && isRealtime && onDeleteExchange && (
+              <button
+                onClick={() => onDeleteExchange(idx)}
+                title="删除这轮对话（云端历史同步删除）"
+                style={{ marginTop: 6, fontSize: "0.72rem", color: "var(--cm-text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              >
+                🗑 删除这轮
+              </button>
+            )}
             {entry.hints && entry.hints.length > 0 && (
               <>
                 <button onClick={() => toggleHints(idx)} style={{ display: "block", marginTop: 8, fontSize: "0.78rem", color: "var(--cm-primary)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -95,13 +100,13 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
       {/* Reveal mode: show reveal button for mock data */}
       {!isRealtime && conversation.length > 0 && (
         <div style={{ textAlign: "center", marginTop: 16 }}>
-          {revealedCount < conversation.length ? (
+          {visibleCount < conversation.length ? (
             <>
               <button className="cm-btn-glass cm-btn-glass-sm" onClick={handleNext}>
                 💡 揭示下一步
               </button>
               <span style={{ marginLeft: 12, fontSize: "0.8rem", color: "var(--cm-text-muted)" }}>
-                剩余 {Math.ceil((conversation.length - revealedCount) / 2)} 轮
+                剩余 {Math.ceil((conversation.length - visibleCount) / 2)} 轮
               </span>
             </>
           ) : (

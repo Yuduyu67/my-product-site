@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
@@ -21,29 +21,20 @@ const AuthContext = createContext<AuthContextValue>({
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [supabaseAvailable, setSupabaseAvailable] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-
-    if (!supabase) {
-      // Supabase 未配置 —— 站点以"访客模式"运行，所有页面可正常访问
-      setLoading(false);
-      setSupabaseAvailable(false);
-      return;
-    }
-
-    setSupabaseAvailable(true);
+    if (!supabase) return;
 
     // Get initial session
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
-      setLoading(false);
+      setInitialized(true);
     }).catch(() => {
       setUser(null);
-      setLoading(false);
+      setInitialized(true);
     });
 
     // Listen for auth changes (login / logout)
@@ -54,14 +45,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   async function signOut() {
-    const supabase = createClient();
     if (!supabase) return;
     await supabase.auth.signOut();
     router.push("/");
   }
+
+  const supabaseAvailable = supabase !== null;
+  // Supabase 未配置 —— 站点以"访客模式"运行，无加载态
+  const loading = supabaseAvailable ? !initialized : false;
 
   return (
     <AuthContext.Provider value={{ user, loading, supabaseAvailable, signOut }}>
