@@ -3,6 +3,7 @@ import "./globals.css";
 import { AppHeader } from "@/components/shared/AppHeader";
 import { Footer } from "@/components/shared/Footer";
 import { AuthProvider } from "@/components/shared/AuthProvider";
+import { ThemeProvider } from "@/components/shared/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "CodeMentor AI — 苏格拉底式启发教学",
@@ -17,11 +18,13 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <AppHeader />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppHeader />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

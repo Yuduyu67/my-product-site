@@ -174,17 +174,17 @@ export default function Home() {
               </div>
 
               <h1 className="appear d42s">
-                <span className="headline-line">Train <em>AI agents</em> on your</span>
-                <span className="headline-line">workflows in minutes.</span>
+                <span className="headline-line">学会写代码，靠的是</span>
+                <span className="headline-line"><em>提问</em>，而不是<span className="headline-emphasis">抄答案</span></span>
               </h1>
 
               <p className="lede-v appear appear--soft d82s">
-                Deploy adaptive AI agents that learn, execute, and scale operational tasks across your business.
+                CodeMentor 用苏格拉底式 AI 导师引导你一步步发现错误 —— 不是直接给结果，而是用问题帮你建立调试思维。
               </p>
 
               <div className="hero-actions-v">
-                <Link href="/signin" className="btn btn-solid btn-hero-solid appear appear--btn d96s">Start for Free</Link>
-                <Link href="/python3" className="btn btn-ghost btn-hero-ghost appear appear--side d110s">See it in action</Link>
+                <Link href="/signin" className="btn btn-solid btn-hero-solid appear appear--btn d96s">免费开始</Link>
+                <Link href="/python3" className="btn btn-ghost btn-hero-ghost appear appear--side d110s">试试看</Link>
               </div>
             </div>
           </main>
@@ -199,7 +199,7 @@ export default function Home() {
                 <defs><linearGradient id="w1" x1="3" y1="2" x2="14" y2="22"><stop stopColor="rgba(255,255,255,.38)" /><stop offset="1" stopColor="rgba(58,58,58,.62)" /></linearGradient>
                 <linearGradient id="w2" x1="14" y1="2" x2="21" y2="22"><stop stopColor="rgba(58,58,58,.38)" /><stop offset="1" stopColor="rgba(255,255,255,.62)" /></linearGradient></defs>
               </svg>
-              <span><Counter target={4200000} decimals={0} />+ workflows automated</span>
+              <span><Counter target={50000} decimals={0} />+ 编程练习已解决</span>
             </div>
 
             <div className="stat appear appear--stat d128s">
@@ -207,7 +207,7 @@ export default function Home() {
                 <rect x="2.4" y="2.4" width="19.2" height="19.2" rx="6.2" fill="#fff" />
                 <path d="M12 7.1v7.4M8.15 12.35L12 16.2l3.85-3.85" stroke="#111" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
-              <span>92% reduction in manual operations</span>
+              <span>苏格拉底式引导，比直接查答案记得更牢</span>
             </div>
 
             <div className="stat appear appear--stat d144s">
@@ -224,7 +224,7 @@ export default function Home() {
                 <circle cx="30.2" cy="11" r="9.2" fill="#f26b1d" />
                 <text x="30.2" y="15.1" textAnchor="middle" fontFamily="Inter,sans-serif" fontSize="12.5" fontWeight="700" fill="#fff">e</text>
               </svg>
-              <span>180+ operational teams onboarded</span>
+              <span>覆盖 Python · Java · C/C++ · JS · HTML/CSS · MySQL · PHP</span>
             </div>
           </footer>
         </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "./AuthProvider";
+import { useTheme } from "./ThemeProvider";
 
 const LANGS = [
   { label: "Python", href: "/python3" },
@@ -15,6 +16,7 @@ const LANGS = [
 export function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, loading, signOut } = useAuth();
+  const { theme, toggle } = useTheme();
 
   // Don't show auth buttons while still checking login state
   if (loading) {
@@ -25,10 +27,19 @@ export function AppHeader() {
     <>
       <header className="cm-header">
         <div className="cm-header-inner">
-          {/* Logo */}
-          <Link className="cm-logo" href="/">
-            ⚡
-          </Link>
+          {/* Logo + Theme Toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Link className="cm-logo" href="/">
+              ⚡
+            </Link>
+            <button
+              onClick={toggle}
+              className="cm-theme-toggle"
+              title={theme === "dark" ? "切换到浅色模式" : "切换到深色模式"}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+          </div>
 
           {/* Nav Pill */}
           <nav className="cm-nav-pill" aria-label="主导航">

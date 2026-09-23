@@ -20,9 +20,11 @@ interface UseChatReturn {
   /** True while saved history is being restored from Supabase */
   restoring: boolean;
   error: string | null;
-  sendMessage: (message: string, code: string, language: string) => Promise<void>;
+  sendMessage: (message: string, code: string, language: string, options?: { giveUp?: boolean }) => Promise<void>;
   /** Remove one exchange (student question + AI answer) from view and from Supabase */
   deleteExchange: (studentIndex: number) => void;
+  /** Clear all messages and reset conversation state */
+  clearConversation: () => void;
 }
 
 export function useChat(language: string): UseChatReturn {
@@ -76,7 +78,8 @@ export function useChat(language: string): UseChatReturn {
   const sendMessage = useCallback(async (
     message: string,
     code: string,
-    chatLanguage: string
+    chatLanguage: string,
+    options?: { giveUp?: boolean }
   ) => {
     setError(null);
     setLoading(true);
@@ -101,6 +104,7 @@ export function useChat(language: string): UseChatReturn {
             role: c.role,
             content: c.content,
           })),
+          giveUp: options?.giveUp ?? false,
         }),
       });
 
@@ -170,5 +174,17 @@ export function useChat(language: string): UseChatReturn {
     }
   }, [conversation, user]);
 
-  return { conversation, loading, restoring, error, sendMessage, deleteExchange };
+  const clearConversation = useCallback(() => {
+    // 删除云端历史（仅已登录用户）
+    if (user) {
+      const supabase = createClient();
+      supabase?.from("conversations")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("language", language);
+    }
+    setConversation([]);
+  }, [user, language]);
+
+  return { conversation, loading, restoring, error, sendMessage, deleteExchange, clearConversation };
 }

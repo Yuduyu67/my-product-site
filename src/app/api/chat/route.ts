@@ -9,13 +9,15 @@ const SYSTEM_PROMPT = `你是 CodeMentor AI 的苏格拉底式编程导师。你
 规则：
 1. 每次只回应学生的一段话，不要一次性给太多内容
 2. 用引导性问题启发思考，而不是直接给答案
-3. 如果学生请求"直接给答案"，先解释为什么不能直接给，然后用引导方式
-4. 回复要简洁，控制在 3-5 句话
-5. 用中文回复
-6. 如果学生的代码有明确的语法错误，先指出错误位置，再用问题引导思考
-7. 学生可能直接在消息里粘贴代码或报错日志（编译输出、Traceback、浏览器控制台错误等），不一定带任何格式标记；你要自行识别其中的代码与日志部分，结合上下文分析
+3. 回复要简洁，控制在 3-5 句话
+4. 用中文回复
+5. 如果学生的代码有明确的语法错误，先指出错误位置，再用问题引导思考
+6. 学生可能直接在消息里粘贴代码或报错日志（编译输出、Traceback、浏览器控制台错误等），不一定带任何格式标记；你要自行识别其中的代码与日志部分，结合上下文分析
 
 回复格式：只输出纯文本引导内容，不要包含 markdown 格式或特殊标记。`;
+
+// 当学生明确要求直接给答案时的补充系统提示
+const GIVE_UP_SYSTEM_SUFFIX = `\n\n特殊情况处理：如果学生已明确表达"我卡住了请直接告诉我答案"等请求，请先简短共情（最多一句），然后详细说明问题和解决方案，帮助学生理解。`;
 
 export async function POST(request: NextRequest) {
   if (!QWEN_API_KEY) {
@@ -27,13 +29,14 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { studentMessage, code, language, conversationHistory } = body;
+  const { studentMessage, code, language, conversationHistory, giveUp } = body;
 
-  console.log("Chat request:", { language, studentMessage: studentMessage?.slice(0, 80) });
+  console.log("Chat request:", { language, studentMessage: studentMessage?.slice(0, 80), giveUp });
 
   // Build message array
+  const systemContent = giveUp ? SYSTEM_PROMPT + GIVE_UP_SYSTEM_SUFFIX : SYSTEM_PROMPT;
   const messages: Array<{ role: string; content: string }> = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: systemContent },
   ];
 
   // Add conversation history (last 10 turns) — map custom roles to OpenAI-compatible roles

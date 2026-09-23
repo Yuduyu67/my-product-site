@@ -22,6 +22,24 @@
   --cm-error: #f87171;
 }
 
+/* ── Light theme overrides (applied when .dark is NOT on html) ── */
+:root:not(.dark) {
+  --cm-bg: #f4f4f5;
+  --cm-surface: rgba(0,0,0,0.04);
+  --cm-surface-hover: rgba(0,0,0,0.08);
+  --cm-border: rgba(0,0,0,0.12);
+  --cm-border-glow: rgba(99,102,241,0.25);
+  --cm-text: #18181b;
+  --cm-text-muted: #71717a;
+  --cm-primary: #6366f1;
+  --cm-primary-dark: #4f46e5;
+  --cm-accent: #0891b2;
+  --cm-gradient: linear-gradient(135deg, #6366f1, #8b5cf6, #0891b2);
+  --cm-success: #059669;
+  --cm-warning: #d97706;
+  --cm-error: #dc2626;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -149,6 +167,27 @@ a {
 
 .cm-logo:hover {
   transform: scale(1.06);
+}
+
+/* ── Theme Toggle Button ── */
+.cm-theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--cm-border);
+  background: var(--cm-surface);
+  color: var(--cm-text);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.cm-theme-toggle:hover {
+  background: var(--cm-surface-hover);
+  border-color: var(--cm-border-glow);
 }
 
 /* Nav pill capsule */

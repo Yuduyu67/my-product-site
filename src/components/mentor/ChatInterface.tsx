@@ -12,9 +12,13 @@ interface ChatInterfaceProps {
   isRealtime?: boolean;
   /** Called with the index of a student message to delete that exchange */
   onDeleteExchange?: (studentIndex: number) => void;
+  /** Called when user clicks "give up" and wants direct answer */
+  onGiveUp?: () => void;
+  /** Called when user clicks "copy share link"; receives base64-encoded conversation JSON */
+  onCopyShareLink?: () => Promise<void>;
 }
 
-export function ChatInterface({ conversation, loading, error, isRealtime = false, onDeleteExchange }: ChatInterfaceProps) {
+export function ChatInterface({ conversation, loading, error, isRealtime = false, onDeleteExchange, onGiveUp, onCopyShareLink }: ChatInterfaceProps) {
   const [revealedCount, setRevealedCount] = useState(0);
   const [revealedHints, setRevealedHints] = useState<Set<number>>(new Set());
 
@@ -93,7 +97,25 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
       {/* Realtime mode: always show all messages, no reveal button */}
       {isRealtime && (
         <div style={{ textAlign: "center", marginTop: 16, padding: "14px 0", borderTop: "1px solid var(--cm-border)", color: "var(--cm-text-muted)", fontSize: "0.85rem" }}>
-          对话已实时展示，继续输入你的问题或代码...
+          <div style={{ marginBottom: 8 }}>对话已实时展示，继续输入你的问题或代码...</div>
+          {conversation.length >= 2 && !loading && onGiveUp && onCopyShareLink && (
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+              <button
+                onClick={() => onGiveUp()}
+                className="cm-btn-outline-glow cm-btn-sm"
+                style={{ padding: "6px 16px", fontSize: "0.78rem", cursor: "pointer" }}
+              >
+                ⚡ 我已卡住，请直接给答案
+              </button>
+              <button
+                onClick={() => onCopyShareLink()}
+                className="cm-btn-glass cm-btn-sm"
+                style={{ padding: "6px 16px", fontSize: "0.78rem", cursor: "pointer" }}
+              >
+                🔗 复制分享链接
+              </button>
+            </div>
+          )}
         </div>
       )}
 
