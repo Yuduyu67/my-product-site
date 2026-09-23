@@ -16,30 +16,50 @@ export default function PythonMentorPage() {
   const { conversation, loading, restoring, error, sendMessage, deleteExchange, clearConversation } = useChat("Python");
   const [showConfirmClear, setShowConfirmClear] = useState(false);
 
-  // 生成分享链接
+  // The actual conversation being displayed to the user
+  const activeConversation = sharedMode ? sharedConversation : conversation;
+
   async function copyShareLink() {
-    if (conversation.length < 2) return;
-    const data = btoa(JSON.stringify({ conversation }));
+    const data = btoa(JSON.stringify({ conversation: activeConversation }));
     const url = `${window.location.origin}${window.location.pathname}?share=${data}`;
+
+    // Try clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast("分享链接已复制到剪贴板！");
+        return;
+      } catch {
+        // Fall through to fallback
+      }
+    }
+
+    // Fallback: temporary textarea + execCommand
     try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // Fallback for older browsers
       const ta = document.createElement("textarea");
       ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      ta.style.top = "-9999px";
       document.body.appendChild(ta);
+      ta.focus();
       ta.select();
-      document.execCommand("copy");
+      const ok = document.execCommand("copy");
       document.body.removeChild(ta);
-    }
-    alert("分享链接已复制到剪贴板！");
+      if (ok) {
+        showToast("分享链接已复制到剪贴板！");
+        return;
+      }
+    } catch {}
+
+    // Final fallback: show the URL so user can copy manually
+    showToast("复制失败，请手动复制：" + url);
   }
 
   function handleGiveUp() {
     return sendMessage("我卡住了，请直接告诉我答案。", "", "Python", { giveUp: true });
   }
 
-  // Show AI conversation when actively chatting; otherwise show mock scene for reveal mode
   const isAiMode = !sharedMode && (restoring || conversation.length >= 2 || loading);
 
   return (
@@ -69,12 +89,11 @@ export default function PythonMentorPage() {
           <CodeInputPanel
             onSend={sharedMode ? undefined : sendMessage}
             loading={loading}
-            language={sharedMode ? "Python" : "Python"}
+            language="Python"
           />
         </div>
         <div className="cm-lab-right">
           {sharedMode ? (
-            // 分享模式：只读展示，禁用交互
             <ChatInterface conversation={sharedConversation} isRealtime onCopyShareLink={copyShareLink} />
           ) : isAiMode ? (
             <ChatInterface conversation={conversation} loading={loading || restoring} error={error} isRealtime onDeleteExchange={deleteExchange} onGiveUp={handleGiveUp} onCopyShareLink={copyShareLink} />
@@ -85,4 +104,21 @@ export default function PythonMentorPage() {
       </div>
     </div>
   );
+}
+
+function showToast(message: string) {
+  const existing = document.querySelector(".cm-copy-toast");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.className = "cm-copy-toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("cm-copy-toast-visible"));
+
+  setTimeout(() => {
+    toast.classList.remove("cm-copy-toast-visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
 }

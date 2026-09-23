@@ -15,12 +15,38 @@ export default function MySQLMentorPage() {
   const { conversation, loading, restoring, error, sendMessage, deleteExchange, clearConversation } = useChat("MySQL");
   const [showConfirmClear, setShowConfirmClear] = useState(false);
 
+  const activeConversation = sharedMode ? sharedConversation : conversation;
+
   async function copyShareLink() {
-    if (conversation.length < 2) return;
-    const data = btoa(JSON.stringify({ conversation }));
+    const data = btoa(JSON.stringify({ conversation: activeConversation }));
     const url = `${window.location.origin}${window.location.pathname}?share=${data}`;
-    try { await navigator.clipboard.writeText(url); } catch {}
-    alert("分享链接已复制到剪贴板！");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast("分享链接已复制到剪贴板！");
+        return;
+      } catch {}
+    }
+
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      ta.style.top = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (ok) {
+        showToast("分享链接已复制到剪贴板！");
+        return;
+      }
+    } catch {}
+
+    showToast("复制失败，请手动复制：" + url);
   }
 
   function handleGiveUp() {
@@ -67,4 +93,18 @@ export default function MySQLMentorPage() {
       </div>
     </div>
   );
+}
+
+function showToast(message: string) {
+  const existing = document.querySelector(".cm-copy-toast");
+  if (existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.className = "cm-copy-toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("cm-copy-toast-visible"));
+  setTimeout(() => {
+    toast.classList.remove("cm-copy-toast-visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
 }
