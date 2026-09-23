@@ -18,35 +18,49 @@ export default function JSMentorPage() {
   const activeConversation = sharedMode ? sharedConversation : conversation;
 
   async function copyShareLink() {
-    const data = btoa(JSON.stringify({ conversation: activeConversation }));
-    const url = `${window.location.origin}${window.location.pathname}?share=${data}`;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      try {
-        await navigator.clipboard.writeText(url);
-        showToast("分享链接已复制到剪贴板！");
-        return;
-      } catch {}
-    }
-
     try {
-      const ta = document.createElement("textarea");
-      ta.value = url;
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      ta.style.top = "-9999px";
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      const ok = document.execCommand("copy");
-      document.body.removeChild(ta);
-      if (ok) {
-        showToast("分享链接已复制到剪贴板！");
-        return;
-      }
-    } catch {}
+      console.log("[copyShareLink] activeConv length:", activeConversation?.length, "sharedMode:", sharedMode);
+      const data = btoa(JSON.stringify({ conversation: activeConversation }));
+      const url = `${window.location.origin}${window.location.pathname}?share=${data}`;
+      console.log("[copyShareLink] url generated, length:", url.length);
 
-    showToast("复制失败，请手动复制：" + url);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(url);
+          console.log("[copyShareLink] clipboard.writeText OK");
+          showToast("分享链接已复制到剪贴板！");
+          return;
+        } catch (e) {
+          console.warn("[copyShareLink] clipboard.writeText failed:", e);
+        }
+      }
+
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        ta.style.top = "-9999px";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (ok) {
+          console.log("[copyShareLink] execCommand OK");
+          showToast("分享链接已复制到剪贴板！");
+          return;
+        }
+      } catch (e) {
+        console.warn("[copyShareLink] execCommand failed:", e);
+      }
+
+      console.log("[copyShareLink] all methods failed, showing toast with URL");
+      showToast("复制失败，请手动复制：" + url);
+    } catch (e) {
+      console.error("[copyShareLink] ERROR:", e);
+      showToast("复制失败：" + e);
+    }
   }
 
   function handleGiveUp() {

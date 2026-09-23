@@ -108,7 +108,14 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
                 ⚡ 我已卡住，请直接给答案
               </button>
               <button
-                onClick={() => onCopyShareLink()}
+                onClick={() => {
+                  try {
+                    console.log("🔗 [ChatInterface] onCopyShareLink clicked");
+                    onCopyShareLink?.();
+                  } catch (e) {
+                    console.error("🔗 [ChatInterface] onCopyShareLink error:", e);
+                  }
+                }}
                 className="cm-btn-glass cm-btn-sm"
                 style={{ padding: "6px 16px", fontSize: "0.78rem", cursor: "pointer" }}
               >
