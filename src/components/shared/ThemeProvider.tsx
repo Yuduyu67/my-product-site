@@ -15,15 +15,14 @@ const ThemeContext = createContext<ThemeContextValue>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  // 初始化时从 localStorage 读取，避免在 effect 中 setState
+  let initialTheme: Theme = "dark";
+  try {
+    const saved = localStorage.getItem("codementor-theme") as Theme | null;
+    if (saved === "light" || saved === "dark") initialTheme = saved;
+  } catch {}
 
-  // 初始化时从 localStorage 读取
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("codementor-theme") as Theme | null;
-      if (saved === "light" || saved === "dark") setTheme(saved);
-    } catch {}
-  }, []);
+  const [theme, setTheme] = useState<Theme>(initialTheme);
 
   // 切换时更新 html class 并持久化
   useEffect(() => {
