@@ -21,6 +21,7 @@ interface ChatInterfaceProps {
 export function ChatInterface({ conversation, loading, error, isRealtime = false, onDeleteExchange, onGiveUp, onCopyShareLink }: ChatInterfaceProps) {
   const [revealedCount, setRevealedCount] = useState(0);
   const [revealedHints, setRevealedHints] = useState<Set<number>>(new Set());
+  const [shareError, setShareError] = useState<string | null>(null);
 
   // Realtime mode shows everything; reveal mode advances manually
   const visibleCount = isRealtime ? conversation.length : Math.min(revealedCount, conversation.length);
@@ -101,7 +102,16 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
           {conversation.length >= 2 && !loading && onGiveUp && onCopyShareLink && (
             <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
               <button
-                onClick={() => onGiveUp()}
+                onClick={() => {
+                  try {
+                    console.log("[ChatInterface] onGiveUp clicked");
+                    onGiveUp?.();
+                    setShareError(null);
+                  } catch (e) {
+                    console.error("[ChatInterface] onGiveUp error:", e);
+                    setShareError("操作失败：" + e);
+                  }
+                }}
                 className="cm-btn-outline-glow cm-btn-sm"
                 style={{ padding: "6px 16px", fontSize: "0.78rem", cursor: "pointer" }}
               >
@@ -110,10 +120,12 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
               <button
                 onClick={() => {
                   try {
-                    console.log("🔗 [ChatInterface] onCopyShareLink clicked");
+                    console.log("[ChatInterface] onCopyShareLink clicked");
+                    setShareError(null);
                     onCopyShareLink?.();
                   } catch (e) {
-                    console.error("🔗 [ChatInterface] onCopyShareLink error:", e);
+                    console.error("[ChatInterface] onCopyShareLink error:", e);
+                    setShareError("复制失败：" + e);
                   }
                 }}
                 className="cm-btn-glass cm-btn-sm"
@@ -121,6 +133,11 @@ export function ChatInterface({ conversation, loading, error, isRealtime = false
               >
                 🔗 复制分享链接
               </button>
+            </div>
+          )}
+          {shareError && (
+            <div style={{ color: "#f87171", fontSize: "0.78rem", marginTop: 8 }}>
+              ⚠️ {shareError}（请打开浏览器控制台查看详细信息）
             </div>
           )}
         </div>
