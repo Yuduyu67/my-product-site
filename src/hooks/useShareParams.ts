@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { decodeShareData } from "@/lib/shareEncode";
 import type { ConversationEntry } from "@/components/mentor/scenes";
 
 /**
@@ -17,7 +18,7 @@ export function extractShareParams(): { sharedMode: boolean; sharedConversation:
       : null;
     const shareData = params?.get("share");
     if (!shareData) return { sharedMode: false, sharedConversation: [] };
-    const decoded = JSON.parse(atob(shareData));
+    const decoded = decodeShareData<{ conversation: ConversationEntry[] }>(shareData);
     if (!decoded || !Array.isArray(decoded.conversation)) return { sharedMode: false, sharedConversation: [] };
     return { sharedMode: true, sharedConversation: decoded.conversation };
   } catch {

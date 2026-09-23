@@ -7,6 +7,7 @@ import { ChatInterface } from "@/components/mentor/ChatInterface";
 import { SCENES } from "@/components/mentor/scenes";
 import { useChat } from "@/hooks/useChat";
 import { useShareParams } from "@/hooks/useShareParams";
+import { encodeShareData } from "@/lib/shareEncode";
 export const dynamic = "force-dynamic";
 
 export default function HTMLCSTMentorPage() {
@@ -20,7 +21,7 @@ export default function HTMLCSTMentorPage() {
   async function copyShareLink() {
     try {
       console.log("[copyShareLink] activeConv length:", activeConversation?.length, "sharedMode:", sharedMode);
-      const data = btoa(JSON.stringify({ conversation: activeConversation }));
+      const data = encodeShareData({ conversation: activeConversation });
       const url = `${window.location.origin}${window.location.pathname}?share=${data}`;
       console.log("[copyShareLink] url generated, length:", url.length);
 
